@@ -1,0 +1,32 @@
+name: Update DuckDNS IP
+
+# 触发条件：每隔 5 分钟运行一次
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  # 允许手动点击运行
+  workflow_dispatch:
+
+jobs:
+  update-ip:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 下载你的代码（包含脚本和 token.txt）
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. 给脚本执行权限并运行它
+      - name: Run update script
+        run: |
+          chmod +x update_duckdns.sh
+          ./update_duckdns.sh
+
+      # 3. 如果日志更新了，自动保存回 GitHub
+      - name: Commit and push if changed
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add update.log
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update log"
+          git push
